@@ -1,6 +1,8 @@
 package ru.anoshindanil.authtorizationservice.filter;
 
 import io.jsonwebtoken.Claims;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,10 +24,12 @@ import java.util.Collections;
 @Component
 @Slf4j
 @RequiredArgsConstructor
+@Tag(name = "JWT", description = "Фильтр для обработки JWT-токенов")
 public class JwtFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
 
     @Override
+    @Operation(summary = "Обработка JWT-токена", description = "Проверяет заголовок Authorization, валидирует JWT и устанавливает пользователя в SecurityContext.")
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException
     {

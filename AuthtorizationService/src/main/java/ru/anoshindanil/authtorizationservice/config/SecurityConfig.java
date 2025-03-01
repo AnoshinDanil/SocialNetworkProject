@@ -1,5 +1,7 @@
 package ru.anoshindanil.authtorizationservice.config;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,11 +18,13 @@ import ru.anoshindanil.authtorizationservice.filter.JwtFilter;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@Tag(name = "Security", description = "Настройки безопасности приложения")
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
 
     @Bean
+    @Operation(summary = "Настройка безопасности", description = "Отключает CSRF, настраивает JWT и разрешает Swagger.")
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable) // отключение CSRF защиты
                 .authorizeHttpRequests(auth -> auth
@@ -34,6 +38,7 @@ public class SecurityConfig {
     }
 
     @Bean
+    @Operation(summary = "Получить PasswordEncoder", description = "Создаёт и возвращает BCryptPasswordEncoder.")
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
