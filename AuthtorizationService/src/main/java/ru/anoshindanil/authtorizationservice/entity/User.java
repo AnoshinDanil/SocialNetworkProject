@@ -15,8 +15,8 @@ import java.util.UUID;
 @Table(name = "users")
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Schema(description = "Сущность пользователя")
 public class User {
 

@@ -37,7 +37,7 @@ public class JwtService {
             summary = "Генерация JWT токена",
             description = "Генерирует JWT токен для пользователя с ролью и временем действия.",
             responses = {
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Токен успешно сгенерирован")
+                    @ApiResponse(responseCode = "200", description = "Токен успешно сгенерирован")
             }
     )
     public String generateToken(@Parameter(description = "Пользователь для генерации токена")User user) {
