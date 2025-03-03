@@ -37,7 +37,7 @@ public class SecurityConfig {
                 .exceptionHandling(
                         exception -> exception
                                 .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-                )
+                ) //настройка обработчика ошибок. Пусть возвращает 401
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); //фильтр jwt токена на каждый запрос
 
         return http.build();
