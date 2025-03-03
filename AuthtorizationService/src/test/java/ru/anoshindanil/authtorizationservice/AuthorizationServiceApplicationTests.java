@@ -49,7 +49,7 @@ class AuthorizationServiceApplicationTests {
     private final String jwtToken = "mocked_jwt_token";
 
     @BeforeEach
-    @Operation(summary = "Создание дто и юзера", description = "Создаем дто и экземпляр юзера")
+    @Operation(summary = "Создание дто и юзера", description = "Создание экзмепляров, которые будут использоваться в тестах")
     void setUp() {
         registerRequest = new RegisterRequestDto("testUser", "test@example.com", "password123");
         loginRequest = new LoginRequestDto("test@example.com", "password123");

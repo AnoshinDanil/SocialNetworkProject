@@ -1,6 +1,8 @@
 package ru.anoshindanil.authtorizationservice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
+@Tag(name = "AuthorizationControllerTest", description = "Тесты для проверки контроллера")
 class AuthorizationControllerTest {
 
     @Autowired
@@ -38,11 +41,13 @@ class AuthorizationControllerTest {
     private PasswordEncoder passwordEncoder;
 
     @BeforeEach
+    @Operation(summary = "Очистка репозитория перед запуском тестов")
     void setUp() {
         userRepository.deleteAll();
     }
 
     @Test
+    @Operation(summary = "Тест register_Success", description = "Тест проверяет поведение метода register и возвращает токен")
     void register_Success() throws Exception {
         RegisterRequestDto request = new RegisterRequestDto("testUser", "test@example.com", "password123");
 
@@ -54,6 +59,7 @@ class AuthorizationControllerTest {
     }
 
     @Test
+    @Operation(summary = "Тест register_UserAlreadyExists", description = "Тест проверяет поведение метода register в случае, если пользователь с таким email уже существует, и ожидает ошибку")
     void register_UserAlreadyExists() throws Exception {
         userRepository.save(
                 new User(
@@ -78,6 +84,7 @@ class AuthorizationControllerTest {
     }
 
     @Test
+    @Operation(summary = "Тест login_Success", description = "Тест проверяет поведение метода login и возвращает токен")
     void login_Success() throws Exception {
         userRepository.save(
                 new User(
@@ -103,6 +110,7 @@ class AuthorizationControllerTest {
     }
 
     @Test
+    @Operation(summary = "Тест login_UserNotFound", description = "Тест проверяет поведение метода login и в случае, если пользователь не найден, ожидает ошибку")
     void login_UserNotFound() throws Exception {
         LoginRequestDto request = new LoginRequestDto("notfound@example.com", "password123");
 
