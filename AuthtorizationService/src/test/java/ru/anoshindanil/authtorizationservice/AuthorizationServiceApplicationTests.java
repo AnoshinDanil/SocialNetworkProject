@@ -16,7 +16,7 @@ import ru.anoshindanil.authtorizationservice.entity.User;
 import ru.anoshindanil.authtorizationservice.enums.Role;
 import ru.anoshindanil.authtorizationservice.model.AuthResponse;
 import ru.anoshindanil.authtorizationservice.repository.UserRepository;
-import ru.anoshindanil.authtorizationservice.service.AuthService;
+import ru.anoshindanil.authtorizationservice.service.AuthServiceImpl;
 import ru.anoshindanil.authtorizationservice.service.JwtService;
 
 import java.time.LocalDateTime;
@@ -41,12 +41,11 @@ class AuthorizationServiceApplicationTests {
     private JwtService jwtService;
 
     @InjectMocks
-    private AuthService authService;
+    private AuthServiceImpl authService;
 
     private RegisterRequestDto registerRequest;
     private LoginRequestDto loginRequest;
     private User user;
-    private String encodedPassword = "encoded_password";
     private final String jwtToken = "mocked_jwt_token";
 
     @BeforeEach
@@ -72,6 +71,7 @@ class AuthorizationServiceApplicationTests {
     @Operation(summary = "Тест register_Success", description = "Тест проверяет поведение метода register и возвращает токен")
     void register_Success() {
         when(userRepository.findByEmail(registerRequest.getEmail())).thenReturn(Optional.empty());
+        String encodedPassword = "encoded_password";
         when(passwordEncoder.encode(registerRequest.getPassword())).thenReturn(encodedPassword);
         when(jwtService.generateToken(any(User.class))).thenReturn(jwtToken);
 

@@ -23,9 +23,9 @@ public class AuthController {
 
     @Operation(summary = "Регистрация нового пользователя")
     @PostMapping("/register")
-    public ResponseEntity<String> register(@Valid @RequestBody RegisterRequestDto request) {
-        authService.register(request);
-        return ResponseEntity.ok("User registered successfully");
+    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequestDto request) {
+        AuthResponse response = authService.register(request);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Вход в систему")

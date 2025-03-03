@@ -12,6 +12,7 @@ import ru.anoshindanil.authtorizationservice.dto.LoginRequestDto;
 import ru.anoshindanil.authtorizationservice.dto.RegisterRequestDto;
 import ru.anoshindanil.authtorizationservice.entity.User;
 import ru.anoshindanil.authtorizationservice.enums.Role;
+import ru.anoshindanil.authtorizationservice.exceptions.UserAlreadyExistsException;
 import ru.anoshindanil.authtorizationservice.model.AuthResponse;
 import ru.anoshindanil.authtorizationservice.repository.UserRepository;
 
@@ -56,7 +57,7 @@ public class AuthServiceImpl implements AuthService {
     )
     public AuthResponse register(RegisterRequestDto request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("User with this email already exists");
+            throw new UserAlreadyExistsException("User with this email already exists");
         }
 
         User user = new User();
