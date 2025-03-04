@@ -8,21 +8,24 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import org.springframework.web.client.RestTemplate;
 import ru.anoshindanil.authtorizationservice.dto.LoginRequestDto;
 import ru.anoshindanil.authtorizationservice.dto.RegisterRequestDto;
-import ru.anoshindanil.authtorizationservice.entity.User;
+import ru.anoshindanil.authtorizationservice.dto.UserCreateRequestDto;
+import ru.anoshindanil.authtorizationservice.entity.UserCredentials;
 import ru.anoshindanil.authtorizationservice.enums.Role;
-import ru.anoshindanil.authtorizationservice.exceptions.UserAlreadyExistsException;
 import ru.anoshindanil.authtorizationservice.model.AuthResponse;
-import ru.anoshindanil.authtorizationservice.repository.UserRepository;
+import ru.anoshindanil.authtorizationservice.repository.UserCredentialsRepository;
 
 @Service
 @RequiredArgsConstructor
-@Tag(name = "Аутентификация и регистрация", description = "Сервис для аутентификации пользователей и регистрации новых аккаунтов")
+@Tag(name = "Операции аутентификации и регистрации", description = "Сервис для аутентификации пользователей и регистрации новых аккаунтов")
 public class AuthServiceImpl implements AuthService {
-    private final UserRepository userRepository;
+    private final UserCredentialsRepository userCredentialsRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final RestTemplate restTemplate;
 
     @Override
     @Operation(
@@ -34,14 +37,14 @@ public class AuthServiceImpl implements AuthService {
             }
     )
     public AuthResponse login(LoginRequestDto request) {
-        User user = userRepository.findByEmail(request.getEmail())
+        UserCredentials user = userCredentialsRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new BadCredentialsException("Invalid password");
         }
 
-        String token = jwtService.generateToken(user);
+        String token = jwtService.generateToken(user.getEmail(),user.getRole());
 
         return new AuthResponse(token);
     }
@@ -56,19 +59,23 @@ public class AuthServiceImpl implements AuthService {
             }
     )
     public AuthResponse register(RegisterRequestDto request) {
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new UserAlreadyExistsException("User with this email already exists");
+        if (userCredentialsRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Email уже используется");
         }
 
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setEmail(request.getEmail());
-        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-        user.setRole(Role.USER);
+        UserCredentials credentials = new UserCredentials();
+        credentials.setEmail(request.getEmail());
+        credentials.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        credentials.setRole(Role.USER);
 
-        userRepository.save(user);
+        userCredentialsRepository.save(credentials);
 
-        String token = jwtService.generateToken(user);
+        UserCreateRequestDto userCreateRequest = new UserCreateRequestDto(request.getUsername(), request.getEmail());
+
+        String userServiceUrl = "localhost:8082/api/users/create";
+        restTemplate.postForObject(userServiceUrl, userCreateRequest, Void.class);
+
+        String token = jwtService.generateToken(credentials.getEmail(),credentials.getRole());
 
         return new AuthResponse(token);
     }

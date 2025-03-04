@@ -12,12 +12,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.anoshindanil.authtorizationservice.dto.LoginRequestDto;
 import ru.anoshindanil.authtorizationservice.dto.RegisterRequestDto;
-import ru.anoshindanil.authtorizationservice.entity.User;
+import ru.anoshindanil.authtorizationservice.entity.UserCredentials;
 import ru.anoshindanil.authtorizationservice.enums.Role;
-import ru.anoshindanil.authtorizationservice.repository.UserRepository;
+import ru.anoshindanil.authtorizationservice.repository.UserCredentialsRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -32,7 +30,7 @@ class AuthorizationControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private UserRepository userRepository;
+    private UserCredentialsRepository userCredentialsRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -43,7 +41,7 @@ class AuthorizationControllerTest {
     @BeforeEach
     @Operation(summary = "Очистка репозитория перед запуском тестов")
     void setUp() {
-        userRepository.deleteAll();
+        userCredentialsRepository.deleteAll();
     }
 
     @Test
@@ -61,16 +59,11 @@ class AuthorizationControllerTest {
     @Test
     @Operation(summary = "Тест register_UserAlreadyExists", description = "Тест проверяет поведение метода register в случае, если пользователь с таким email уже существует, и ожидает ошибку")
     void register_UserAlreadyExists() throws Exception {
-        userRepository.save(
-                new User(
+        userCredentialsRepository.save(
+                new UserCredentials(
                         null,
-                        "johndoe",
                         "test@example.com",
                         passwordEncoder.encode("password123"),
-                        "John Doe",
-                        "Java-разработчик, люблю путешествия",
-                        "https://example.com/avatar.jpg",
-                        LocalDateTime.now(),
                         Role.USER
                 )
         );
@@ -86,16 +79,11 @@ class AuthorizationControllerTest {
     @Test
     @Operation(summary = "Тест login_Success", description = "Тест проверяет поведение метода login и возвращает токен")
     void login_Success() throws Exception {
-        userRepository.save(
-                new User(
+        userCredentialsRepository.save(
+                new UserCredentials(
                         null,
-                        "johndoe",
                         "johndoe@example.com",
                         passwordEncoder.encode("password123"),
-                        "John Doe",
-                        "Java-разработчик, люблю путешествия",
-                        "https://example.com/avatar.jpg",
-                        LocalDateTime.now(),
                         Role.USER
                 )
         );

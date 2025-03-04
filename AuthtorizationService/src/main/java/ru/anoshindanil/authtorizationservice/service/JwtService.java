@@ -1,7 +1,6 @@
 package ru.anoshindanil.authtorizationservice.service;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.jsonwebtoken.Claims;
@@ -11,7 +10,7 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import ru.anoshindanil.authtorizationservice.entity.User;
+import ru.anoshindanil.authtorizationservice.enums.Role;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -40,10 +39,10 @@ public class JwtService {
                     @ApiResponse(responseCode = "200", description = "Токен успешно сгенерирован")
             }
     )
-    public String generateToken(@Parameter(description = "Пользователь для генерации токена")User user) {
+    public String generateToken(String email, Role role) {
         return Jwts.builder()
-                .subject(user.getUsername())
-                .claim("roles", user.getRole())
+                .subject(email)
+                .claim("roles", role)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + jwtExpression))
                 .signWith(secretKey)

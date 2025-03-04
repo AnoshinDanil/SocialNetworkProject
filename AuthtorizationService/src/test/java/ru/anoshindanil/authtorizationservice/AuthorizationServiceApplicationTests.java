@@ -12,14 +12,13 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.anoshindanil.authtorizationservice.dto.LoginRequestDto;
 import ru.anoshindanil.authtorizationservice.dto.RegisterRequestDto;
-import ru.anoshindanil.authtorizationservice.entity.User;
+import ru.anoshindanil.authtorizationservice.entity.UserCredentials;
 import ru.anoshindanil.authtorizationservice.enums.Role;
 import ru.anoshindanil.authtorizationservice.model.AuthResponse;
-import ru.anoshindanil.authtorizationservice.repository.UserRepository;
+import ru.anoshindanil.authtorizationservice.repository.UserCredentialsRepository;
 import ru.anoshindanil.authtorizationservice.service.AuthServiceImpl;
 import ru.anoshindanil.authtorizationservice.service.JwtService;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,7 +31,7 @@ import static org.mockito.Mockito.*;
 class AuthorizationServiceApplicationTests {
 
     @Mock
-    private UserRepository userRepository;
+    private UserCredentialsRepository userRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -45,7 +44,7 @@ class AuthorizationServiceApplicationTests {
 
     private RegisterRequestDto registerRequest;
     private LoginRequestDto loginRequest;
-    private User user;
+    private UserCredentials userCredentials;
     private final String jwtToken = "mocked_jwt_token";
 
     @BeforeEach
@@ -54,15 +53,10 @@ class AuthorizationServiceApplicationTests {
         registerRequest = new RegisterRequestDto("testUser", "test@example.com", "password123");
         loginRequest = new LoginRequestDto("test@example.com", "password123");
 
-        user = new User(
+        userCredentials = new UserCredentials(
                 UUID.randomUUID(),
-                "johndoe",
                 "johndoe@example.com",
                 "hashedPassword",
-                "John Doe",
-                "Java-разработчик, люблю путешествия",
-                "https://example.com/avatar.jpg",
-                LocalDateTime.now(),
                 Role.USER
         );
     }
@@ -73,40 +67,40 @@ class AuthorizationServiceApplicationTests {
         when(userRepository.findByEmail(registerRequest.getEmail())).thenReturn(Optional.empty());
         String encodedPassword = "encoded_password";
         when(passwordEncoder.encode(registerRequest.getPassword())).thenReturn(encodedPassword);
-        when(jwtService.generateToken(any(User.class))).thenReturn(jwtToken);
+        when(jwtService.generateToken(anyString(),any(Role.class))).thenReturn(jwtToken);
 
         AuthResponse response = authService.register(registerRequest);
 
         assertNotNull(response);
         assertEquals(jwtToken, response.getToken());
 
-        verify(userRepository, times(1)).save(any(User.class));
+        verify(userRepository, times(1)).save(any(UserCredentials.class));
     }
 
     @Test
     @Operation(summary = "Тест register_UserAlreadyExists", description = "Тест проверяет поведение метода register в случае, если пользователь с таким email уже существует, и ожидает ошибку")
     void register_UserAlreadyExists() {
-        when(userRepository.findByEmail(registerRequest.getEmail())).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail(registerRequest.getEmail())).thenReturn(Optional.of(userCredentials));
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> authService.register(registerRequest));
         assertEquals("User with this email already exists", exception.getMessage());
 
-        verify(userRepository, never()).save(any(User.class));
+        verify(userRepository, never()).save(any(UserCredentials.class));
     }
 
     @Test
     @Operation(summary = "Тест login_Success", description = "Тест проверяет поведение метода login и возвращает токен")
     void login_Success() {
-        when(userRepository.findByEmail(loginRequest.getEmail())).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches(loginRequest.getPassword(), user.getPasswordHash())).thenReturn(true);
-        when(jwtService.generateToken(user)).thenReturn(jwtToken);
+        when(userRepository.findByEmail(loginRequest.getEmail())).thenReturn(Optional.of(userCredentials));
+        when(passwordEncoder.matches(loginRequest.getPassword(), userCredentials.getPasswordHash())).thenReturn(true);
+        when(jwtService.generateToken(userCredentials.getEmail(),userCredentials.getRole())).thenReturn(jwtToken);
 
         AuthResponse response = authService.login(loginRequest);
 
         assertNotNull(response);
         assertEquals(jwtToken, response.getToken());
 
-        verify(jwtService, times(1)).generateToken(user);
+        verify(jwtService, times(1)).generateToken(userCredentials.getEmail(),userCredentials.getRole());
     }
 
     @Test
@@ -121,8 +115,8 @@ class AuthorizationServiceApplicationTests {
     @Test
     @Operation(summary = "Тест login_InvalidPassword", description = "Тест проверяет поведение метода login и в случае, если пароль не правильный, ожидает ошибку")
     void login_InvalidPassword() {
-        when(userRepository.findByEmail(loginRequest.getEmail())).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches(loginRequest.getPassword(), user.getPasswordHash())).thenReturn(false);
+        when(userRepository.findByEmail(loginRequest.getEmail())).thenReturn(Optional.of(userCredentials));
+        when(passwordEncoder.matches(loginRequest.getPassword(), userCredentials.getPasswordHash())).thenReturn(false);
 
         Exception exception = assertThrows(BadCredentialsException.class, () -> authService.login(loginRequest));
         assertEquals("Invalid password", exception.getMessage());

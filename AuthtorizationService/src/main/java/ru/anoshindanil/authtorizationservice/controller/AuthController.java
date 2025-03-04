@@ -17,7 +17,7 @@ import ru.anoshindanil.authtorizationservice.service.AuthService;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@Tag(name = "Auth", description = "Методы аутентификации и регистрации")
+@Tag(name = "AuthController", description = "Методы аутентификации и регистрации")
 public class AuthController {
     private final AuthService authService;
 

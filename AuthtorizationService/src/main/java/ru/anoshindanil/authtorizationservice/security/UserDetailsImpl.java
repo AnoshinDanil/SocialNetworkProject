@@ -14,8 +14,8 @@ import java.util.Collections;
 @Schema(description = "Модель пользователя для Spring Security")
 public class UserDetailsImpl implements UserDetails {
 
-    @Schema(description = "Имя пользователя (логин)", example = "johndoe")
-    private String username;
+    @Schema(description = "Почта пользователя (логин)", example = "test@example.com")
+    private String email;
 
     @Schema(description = "Хэш пароля пользователя")
     private String password;
@@ -23,8 +23,8 @@ public class UserDetailsImpl implements UserDetails {
     @Schema(description = "Роль пользователя", example = "USER")
     private Role role;
 
-    public UserDetailsImpl(String username, Role role) {
-        this.username = username;
+    public UserDetailsImpl(String email, Role role) {
+        this.email = email;
         this.role = role;
     }
 
@@ -40,6 +40,6 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return email;
     }
 }

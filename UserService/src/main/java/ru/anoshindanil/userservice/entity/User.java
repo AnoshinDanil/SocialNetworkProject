@@ -1,4 +1,4 @@
-package ru.anoshindanil.authtorizationservice.entity;
+package ru.anoshindanil.userservice.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.anoshindanil.authtorizationservice.enums.Role;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -21,8 +20,8 @@ import java.util.UUID;
 public class User {
 
     @Id
-    @Schema(description = "Уникальный идентификатор пользователя", example = "550e8400-e29b-41d4-a716-446655440000")
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Schema(description = "Уникальный идентификатор пользователя", example = "550e8400-e29b-41d4-a716-446655440000")
     private UUID id;
 
     @Column(unique = true, nullable = false)
@@ -32,10 +31,6 @@ public class User {
     @Column(unique = true, nullable = false)
     @Schema(description = "Электронная почта пользователя", example = "johndoe@example.com")
     private String email;
-
-    @Column(name="password_hash", nullable=false)
-    @Schema(description = "Хэш пароля пользователя")
-    private String passwordHash;
 
     @Column
     @Schema(description = "Полное имя пользователя", example = "John Doe")
@@ -52,8 +47,5 @@ public class User {
     @Column(name="created_at")
     @Schema(description = "Дата и время создания пользователя", example = "2024-02-29T12:00:00")
     private LocalDateTime createdAt = LocalDateTime.now();
-
-    @Enumerated(EnumType.STRING)
-    @Schema(description = "Роль пользователя", example = "USER")
-    private Role role;
 }
+
