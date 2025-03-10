@@ -9,12 +9,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import org.springframework.web.client.RestTemplate;
+import org.springframework.transaction.annotation.Transactional;
 import ru.anoshindanil.authtorizationservice.dto.LoginRequestDto;
-import ru.anoshindanil.authtorizationservice.dto.RegisterRequestDto;
-import ru.anoshindanil.authtorizationservice.dto.UserCreateRequestDto;
 import ru.anoshindanil.authtorizationservice.entity.UserCredentials;
 import ru.anoshindanil.authtorizationservice.enums.Role;
+import ru.anoshindanil.authtorizationservice.exceptions.UserAlreadyExistsException;
 import ru.anoshindanil.authtorizationservice.model.AuthResponse;
 import ru.anoshindanil.authtorizationservice.repository.UserCredentialsRepository;
 
@@ -25,7 +24,6 @@ public class AuthServiceImpl implements AuthService {
     private final UserCredentialsRepository userCredentialsRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-    private final RestTemplate restTemplate;
 
     @Override
     @Operation(
@@ -50,17 +48,18 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     @Operation(
-            summary = "Регистрация нового пользователя",
-            description = "Регистрирует нового пользователя, создает аккаунт и возвращает JWT токен.",
+            summary = "Создание реквезитов пользователя",
+            description = "Сохраняет реквезиты о пользователе в базу",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Успешная регистрация и получение токена"),
-                    @ApiResponse(responseCode = "400", description = "Пользователь с таким email уже существует")
+                    @ApiResponse(responseCode = "200", description = "Успешная аутентификация и получение токена"),
+                    @ApiResponse(responseCode = "401", description = "Неверные учетные данные")
             }
     )
-    public AuthResponse register(RegisterRequestDto request) {
+    public void createUserCredentials(LoginRequestDto request) {
         if (userCredentialsRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Email уже используется");
+            throw new UserAlreadyExistsException("Email already exists");
         }
 
         UserCredentials credentials = new UserCredentials();
@@ -69,14 +68,5 @@ public class AuthServiceImpl implements AuthService {
         credentials.setRole(Role.USER);
 
         userCredentialsRepository.save(credentials);
-
-        UserCreateRequestDto userCreateRequest = new UserCreateRequestDto(request.getUsername(), request.getEmail());
-
-        String userServiceUrl = "localhost:8082/api/users/create";
-        restTemplate.postForObject(userServiceUrl, userCreateRequest, Void.class);
-
-        String token = jwtService.generateToken(credentials.getEmail(),credentials.getRole());
-
-        return new AuthResponse(token);
     }
 }

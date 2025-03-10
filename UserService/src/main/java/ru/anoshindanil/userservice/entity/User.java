@@ -32,6 +32,10 @@ public class User {
     @Schema(description = "Электронная почта пользователя", example = "johndoe@example.com")
     private String email;
 
+    @Column(name="password_hash", nullable=false)
+    @Schema(description = "Хэш пароля пользователя")
+    private String passwordHash;
+
     @Column
     @Schema(description = "Полное имя пользователя", example = "John Doe")
     private String name;
