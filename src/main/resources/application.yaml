@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: SocialNetworkProject
+  cloud:
+    gateway:
+      routes:
+        - id: authorization-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/auth/**
+        - id: user-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/users/**
+server:
+  port: 8080
+jwt:
+  secret: e0ba20d42b572206d2944693f02be5c9eac9efe90227a41c2257a4b5cf7b3edb

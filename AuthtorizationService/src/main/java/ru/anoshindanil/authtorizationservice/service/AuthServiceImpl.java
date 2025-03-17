@@ -1,5 +1,6 @@
 package ru.anoshindanil.authtorizationservice.service;
 
+import io.jsonwebtoken.Claims;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import io.swagger.v3.oas.annotations.Operation;
